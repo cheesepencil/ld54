@@ -5,7 +5,8 @@
 // desc:   Limited Space
 // script: js
 
-let activeScene = new TitleScene()
+let activeScene: Scene = new TitleScene()
+const debug = false
 
 function TIC() {
   activeScene.TIC()

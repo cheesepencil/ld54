@@ -1,7 +1,7 @@
 /// <reference path="./constants.ts" />
-/// <reference path="./box.ts" />
+/// <reference path="./vector.ts" />
 
-const DEFAULT_CAMERA_BOUNDS: Box = {
+const DEFAULT_CAMERA_BOUNDS = {
     v1: new Vector(0, 0),
     v2: new Vector(0, 0)
 }
@@ -11,7 +11,7 @@ interface CameraConfig {
     y?: number
     offsetX?: number
     offsetY?: number
-    bounds?: Box
+    bounds?: { v1: Vector, v2: Vector }
     target?: Positionable
     lerpX?: number
     lerpY?: number
@@ -22,7 +22,7 @@ class Camera {
     y: number = 0
     offsetX: number = -Constants.SCREEN_WIDTH / 2
     offsetY: number = -Constants.SCREEN_HEIGHT / 2
-    bounds: Box = DEFAULT_CAMERA_BOUNDS
+    bounds = DEFAULT_CAMERA_BOUNDS
 
     target?: Positionable
     lerpX: number = 0.5

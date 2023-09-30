@@ -37,7 +37,7 @@ class TitleScene extends Scene {
             startX: title.x,
             endX: 16,
             durationFrames: Util.secondsToFrames(1),
-            delayFrames: Util.secondsToFrames(1),
+            delayFrames: Util.secondsToFrames(0),
             easing: Easing.easeOutOvershoot
         }))
         this.tweens.push(new PositionTween({
@@ -45,9 +45,33 @@ class TitleScene extends Scene {
             startX: Constants.SCREEN_WIDTH + 24,
             endX: 32,
             durationFrames: Util.secondsToFrames(1),
-            delayFrames: Util.secondsToFrames(1.5),
+            delayFrames: Util.secondsToFrames(0.5),
             easing: Easing.easeInQuart
         }))
+
+        const box = new Box()
+        box.x = Constants.SCREEN_WIDTH / 2 - 64 - 24
+        box.w = 90
+        this.agents.push(box)
+
+        const cat = new Cat()
+        cat.x = Constants.SCREEN_WIDTH - 64
+        cat.right = false
+        this.agents.push(cat)
+
+        const instructions = new Instructions()
+        instructions.x = -200
+        this.tweens.push(new PositionTween({
+            target: instructions,
+            startX: instructions.x,
+            endX: 6,
+            durationFrames: Util.secondsToFrames(2),
+            delayFrames: Util.secondsToFrames(3)
+        }))
+        this.agents.push(instructions)
+
+        const callToAction = new CallToAction()
+        this.agents.push(callToAction)
     }
 
     update = () => {
@@ -66,6 +90,72 @@ class TitleScene extends Scene {
         print("a game for ludum dare #54 by @cheesepencil",
             4,
             Constants.SCREEN_HEIGHT - 8,
+            14)
+    }
+}
+
+class Instructions {
+    x = 6
+    y = 66
+
+    update() { }
+
+    draw() {
+        print("left: halt left side of cat",
+            this.x,
+            this.y,
             12)
+        print("right: halt right side of cat",
+            this.x,
+            this.y + 9,
+            12)
+        print("Z: halt the whole cat",
+            this.x,
+            this.y + 18,
+            12)
+    }
+}
+
+class CallToAction {
+    ticks = 0
+    x = 50
+    y = 96 + 5
+    show = false
+    fancyText = new FancyText()
+    init = false
+
+    constructor() {
+        this.fancyText.text = "press Z to start"
+        this.fancyText.x = this.x
+        this.fancyText.y = this.y
+        this.fancyText.marginX = 2
+        this.fancyText.marginY = 2
+        this.fancyText.bubbleSize = 2
+        this.fancyText.backgroundColor = 12
+        this.fancyText.textColor = 2
+        this.fancyText.smallFont = true
+    }
+
+    update() {
+        this.ticks += 1
+        if (this.ticks > Util.secondsToFrames(2)){
+            this.ticks = 0
+            this.init = true
+        }
+
+        if (this.init) {
+            if (this.ticks > Util.secondsToFrames(0.5)) {
+                this.ticks = 0
+                this.show = !this.show
+            }
+
+            if (btnp(4)) {
+                activeScene = new Scene()
+            }
+        }
+    }
+
+    draw() {
+        if (this.show) this.fancyText.draw()
     }
 }

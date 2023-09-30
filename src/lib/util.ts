@@ -36,4 +36,13 @@ class Util {
     static round(n: number) {
         return Math.floor(n + 0.5)
     }
+
+    // from https://github.com/nesbox/TIC-80/wiki/Code-examples-and-snippets#palette-swapping
+    static pal(c0?: number, c1?: number) {
+        if (c0 != undefined && c1 != undefined)
+            poke4(0x3ff0 * 2 + c0, c1)
+        else
+            for (var i = 0; i < 16; i++)
+                poke4(0x3ff0 * 2 + i, i)
+    }
 }
