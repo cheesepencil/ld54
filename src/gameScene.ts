@@ -197,7 +197,7 @@ class GameScene extends Scene {
         this.cat.hide = true
         this.cat.w = Util.getRandomIntBetween(36, 101)
         this.cat.right = Util.getRandomInt(2) > 0
-        this.cat.x = this.cat.right ? 0 - this.cat.w - 32: Constants.SCREEN_WIDTH + 32
+        this.cat.x = this.cat.right ? 0 - this.cat.w - 64: Constants.SCREEN_WIDTH + 64
         this.box.w = Util.getRandomIntBetween(48, 151)
         this.box.right = Util.getRandomInt(2) > 0
         this.box.x = Constants.SCREEN_WIDTH / 2 - this.box.w / 2
