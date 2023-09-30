@@ -1,0 +1,11 @@
+{
+  "tic": {
+    "ticExecutable": "d:/tic80/tic80.exe"
+  },
+  "compression": {
+    "compressedFile": "build/compressed.js",
+    "indentLevel": 1,
+    "compress": true,
+    "mangle": true
+  }
+}
