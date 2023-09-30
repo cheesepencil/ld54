@@ -14,10 +14,11 @@ class CatConstants {
     static readonly HEAD_SAD = 392
     static readonly HEAD_YAY = 396
     static readonly BODY_COLOR = 14
-    static readonly CAT_Y = 96-8
+    static readonly CAT_Y = 96 - 8
 }
 
 class Cat {
+    scene: Scene
     x = 0
     y = CatConstants.CAT_Y
     w = 48
@@ -26,6 +27,11 @@ class Cat {
     headFrame = CatConstants.HEAD_IDLE
     animSpeed = Util.secondsToFrames(0.125)
     ticks = 0
+    hide = false
+
+    constructor(scene: Scene) {
+        this.scene = scene
+    }
 
     update() {
         this.ticks += 1
@@ -37,17 +43,23 @@ class Cat {
     }
 
     draw() {
+        if (this.hide) return
+        
+        const camX = this.scene.camera.x
+        const camY = this.scene.camera.y
+
         // front
-        const frontX = this.right
+        const frontX = (this.right
             ? this.x + this.w - CatConstants.FRONT_W * 8
-            : this.x + 1
+            : this.x + 1) - camX
+        const frontY = this.y - camY
         Util.pal(14, 0)
         Util.pal(15, 0)
         for (let i = -1; i <= 1; i += 2) {
             spr(
                 CatConstants.FRONT_WALK_FRAMES[this.bodyFrameIndex],
                 frontX + i,
-                this.y,
+                frontY,
                 0,
                 undefined,
                 this.right ? undefined : 1,
@@ -58,7 +70,7 @@ class Cat {
             spr(
                 CatConstants.FRONT_WALK_FRAMES[this.bodyFrameIndex],
                 frontX,
-                this.y + i,
+                frontY + i,
                 0,
                 undefined,
                 this.right ? undefined : 1,
@@ -71,7 +83,7 @@ class Cat {
         spr(
             CatConstants.FRONT_WALK_FRAMES[this.bodyFrameIndex],
             frontX,
-            this.y,
+            frontY,
             0,
             undefined,
             this.right ? undefined : 1,
@@ -81,16 +93,17 @@ class Cat {
         )
 
         // back
-        const rearX = this.right
+        const rearX = (this.right
             ? this.x + 1
-            : this.x + this.w - CatConstants.REAR_W * 8
+            : this.x + this.w - CatConstants.REAR_W * 8) - camX
+        const rearY = this.y - camY
         Util.pal(14, 0)
         Util.pal(15, 0)
         for (let i = -1; i <= 1; i += 2) {
             spr(
                 CatConstants.REAR_WALK_FRAMES[this.bodyFrameIndex],
                 rearX + (Math.abs(i) * (this.right ? -1 : 1)),
-                this.y,
+                rearY,
                 0,
                 undefined,
                 this.right ? undefined : 1,
@@ -101,7 +114,7 @@ class Cat {
             spr(
                 CatConstants.REAR_WALK_FRAMES[this.bodyFrameIndex],
                 rearX,
-                this.y + i,
+                rearY + i,
                 0,
                 undefined,
                 this.right ? undefined : 1,
@@ -114,7 +127,7 @@ class Cat {
         spr(
             CatConstants.REAR_WALK_FRAMES[this.bodyFrameIndex],
             rearX,
-            this.y,
+            rearY,
             0,
             undefined,
             this.right ? undefined : 1,
@@ -125,20 +138,20 @@ class Cat {
 
         // belly glue
         if (this.w > 48) {
+            const glueX = (this.right
+                ? this.x + CatConstants.REAR_W * 8
+                : this.x + CatConstants.FRONT_W * 8) - camX
+            const glueY = this.y + 5 - camY
             rectb(
-                this.right
-                    ? this.x + CatConstants.REAR_W * 8
-                    : this.x + CatConstants.FRONT_W * 8,
-                this.y + 5 - 1,
+                glueX,
+                glueY - 1,
                 this.w - CatConstants.REAR_W * 8 - CatConstants.FRONT_W * 8 + 1,
                 21,
                 0
             )
             rect(
-                this.right
-                    ? this.x + CatConstants.REAR_W * 8
-                    : this.x + CatConstants.FRONT_W * 8,
-                this.y + 5,
+                glueX,
+                glueY,
                 this.w - CatConstants.REAR_W * 8 - CatConstants.FRONT_W * 8 + 1,
                 19,
                 CatConstants.BODY_COLOR
@@ -147,14 +160,15 @@ class Cat {
 
         //tail
         Util.pal(14, 0)
-        const tailX = this.right
+        const tailX = (this.right
             ? this.x + 1
-            : this.x + this.w - CatConstants.TAIL_W * 8
+            : this.x + this.w - CatConstants.TAIL_W * 8) - camX
+        const tailY = this.y - CatConstants.TAIL_H * 8 - camY
         for (let i = -1; i <= 1; i += 2) {
             spr(
                 CatConstants.TAIL_WALK_FRAMES[0],
                 tailX + i,
-                this.y - CatConstants.TAIL_H * 8,
+                tailY,
                 0,
                 undefined,
                 this.right ? undefined : 1,
@@ -165,7 +179,7 @@ class Cat {
             spr(
                 CatConstants.TAIL_WALK_FRAMES[0],
                 tailX,
-                this.y - CatConstants.TAIL_H * 8 + i,
+                tailY + i,
                 0,
                 undefined,
                 this.right ? undefined : 1,
@@ -178,7 +192,7 @@ class Cat {
         spr(
             CatConstants.TAIL_WALK_FRAMES[0],
             tailX,
-            this.y - CatConstants.TAIL_H * 8,
+            tailY,
             0,
             undefined,
             this.right ? undefined : 1,
@@ -189,23 +203,24 @@ class Cat {
 
         // tail glue
         line(
-            this.right ? tailX + 3 : tailX + 8,
-            this.y,
-            this.right ? tailX + 7 : tailX + 8 + 4,
-            this.y,
+            (this.right ? tailX + 3 : tailX + 9),
+            this.y - camY,
+            (this.right ? tailX + 7 : tailX + 8 + 4),
+            this.y - camY,
             CatConstants.BODY_COLOR)
 
         // head
-        const headX = this.right
+        const headX = (this.right
             ? this.x + this.w - CatConstants.HEAD_W * 8 + 20 + 1
-            : this.x - 20
+            : this.x - 20) - camX
+        const headY = this.y - 10 - camY
         Util.pal(14, 0)
         Util.pal(15, 0)
         for (let i = -1; i <= 1; i += 2) {
             spr(
                 this.headFrame,
                 headX + i,
-                this.y - 10,
+                headY,
                 0,
                 undefined,
                 this.right ? undefined : 1,
@@ -216,7 +231,7 @@ class Cat {
             spr(
                 this.headFrame,
                 headX,
-                this.y - 10 + i,
+                headY + i,
                 0,
                 undefined,
                 this.right ? undefined : 1,
@@ -229,7 +244,7 @@ class Cat {
         spr(
             this.headFrame,
             headX,
-            this.y - 10,
+            headY,
             0,
             undefined,
             this.right ? undefined : 1,
@@ -238,8 +253,8 @@ class Cat {
             CatConstants.HEAD_H
         )
         if (debug) {
-            line(this.x, this.y, this.x, this.y + 32, 6)
-            line(this.x + this.w, this.y, this.x + this.w, this.y + 32, 6)
+            line(this.x - camX, this.y - camY, this.x - camX, this.y + 32 - camY, 6)
+            line(this.x + this.w - camX, this.y - camY, this.x + this.w - camX, this.y + 32 - camY, 6)
         }
     }
 }

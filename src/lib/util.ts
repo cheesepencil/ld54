@@ -45,4 +45,12 @@ class Util {
             for (var i = 0; i < 16; i++)
                 poke4(0x3ff0 * 2 + i, i)
     }
+
+    static getRandomInt(max: number) {
+        return Math.floor(Math.random() * max)
+    }
+
+    static getRandomIntBetween(min: number, max: number) {
+        return min + Math.floor(Math.random() * (max-min))
+    }
 }
