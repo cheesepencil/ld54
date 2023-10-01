@@ -77,7 +77,7 @@ class GameScene extends Scene {
 
         if (this.ready) {
             // left arrow
-            if (btnp(2)) {
+            if (btnp(2) || btnp(6)) {
                 if (this.cat.right) {
                     sfx(6)
                     this.catBackActive = false
@@ -89,7 +89,7 @@ class GameScene extends Scene {
             }
 
             // right arrow
-            if (btnp(3)) {
+            if (btnp(3) || btnp(7)) {
                 if (this.cat.right) {
                     sfx(7)
                     this.catFrontActive = false
