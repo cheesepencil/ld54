@@ -10,6 +10,7 @@ class Commentary implements Actor {
         this.commentaryText.y = Constants.SCREEN_HEIGHT + 8
         this.commentaryText.textColor = textColor
         this.commentaryText.fixedWidth = true
+        this.commentaryText.outlineColor = 15
         this.actors.push(this.commentaryText)
 
         const tween = new PositionTween({

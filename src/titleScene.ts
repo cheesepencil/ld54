@@ -4,6 +4,8 @@ class TitleScene extends Scene {
     actors: { draw: () => void, update: () => void }[] = []
     tweens: PositionTween[] = []
     transitioning = false
+    catButtSpeed = 1
+    cat?: Cat
 
     init = () => {
         this.tweens.push(new PositionTween({
@@ -21,9 +23,10 @@ class TitleScene extends Scene {
         this.actors.push(box)
 
         const cat = new Cat(this)
-        cat.x = Constants.SCREEN_WIDTH - 64
+        cat.x = 128
         cat.right = false
         cat.w = 60
+        this.cat = cat
         this.actors.push(cat)
 
         const callToAction = new CallToAction(this)
@@ -37,12 +40,23 @@ class TitleScene extends Scene {
         for (const actor of this.actors) {
             actor.update()
         }
+        if (this.cat && this.cat.w > 110) {
+            this.catButtSpeed *= -1
+        }
+        else if (this.cat && this.cat.w < 60) {
+            this.catButtSpeed *= -1
+        }
+        if (this.cat) this.cat.w += this.catButtSpeed
     }
 
     draw = () => {
         for (const agent of this.actors) {
             agent.draw()
         }
+        print(`high score: ${highScore}`,
+            4 - this.camera.x,
+            Constants.SCREEN_HEIGHT - 16 - this.camera.y,
+            14)
         print("a game for ludum dare #54 by @cheesepencil",
             4 - this.camera.x,
             Constants.SCREEN_HEIGHT - 8 - this.camera.y,

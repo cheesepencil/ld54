@@ -14,12 +14,13 @@ class FancyText {
     marginX = 0
     marginY = 0
     baseHeight = 6
+    outlineColor?: number
 
     update = () => { }
 
     draw = () => {
         clip(0, 0, 0, 0)
-        const w = this.printMe(0,0)
+        const w = this.printMe(0, 0)
         clip()
 
         const camOffsetX = this.scene?.camera?.x ?? 0
@@ -50,6 +51,40 @@ class FancyText {
     }
 
     printMe(camOffsetX: number, camOffsetY: number) {
+        if (!isNaN(Number(this.outlineColor))) {
+            print(
+                this.text,
+                this.x - camOffsetX + 1,
+                this.y - camOffsetY,
+                this.outlineColor,
+                this.fixedWidth,
+                this.scale,
+                this.smallFont)
+            print(
+                this.text,
+                this.x - camOffsetX - 1,
+                this.y - camOffsetY,
+                this.outlineColor,
+                this.fixedWidth,
+                this.scale,
+                this.smallFont)
+            print(
+                this.text,
+                this.x - camOffsetX,
+                this.y - camOffsetY + 1,
+                this.outlineColor,
+                this.fixedWidth,
+                this.scale,
+                this.smallFont)
+            print(
+                this.text,
+                this.x - camOffsetX,
+                this.y - camOffsetY - 1,
+                this.outlineColor,
+                this.fixedWidth,
+                this.scale,
+                this.smallFont)
+        }
         return print(
             this.text,
             this.x - camOffsetX,
