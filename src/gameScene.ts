@@ -178,12 +178,13 @@ class GameScene extends Scene {
         this.tweens.push(cameraTween)
     }
 
-    panOut() {
+    panOut(delay?: number) {
         const cameraTween = new PositionTween({
             target: this.camera,
             startX: 0,
             endX: Constants.SCREEN_WIDTH + 32,
             durationFrames: Util.secondsToFrames(0.5),
+            delayFrames: Util.secondsToFrames(delay ?? 0),
             easing: Easing.easeOutQuad,
             callback: () => {
                 this.deleteTween(cameraTween)
@@ -206,6 +207,7 @@ class GameScene extends Scene {
         this.cat.x = this.cat.right ? 0 - this.cat.w - 64 : Constants.SCREEN_WIDTH + 64
         this.cat.y = CatConstants.CAT_Y - 16
         this.cat.headFrame = CatConstants.HEAD_IDLE
+        this.cat.clip = false
         this.box.w = Util.getRandomIntBetween(48, 151)
         this.box.right = Util.getRandomInt(2) > 0
         this.box.x = Math.floor(Constants.SCREEN_WIDTH / 2 - this.box.w / 2)
@@ -224,8 +226,6 @@ class GameScene extends Scene {
         this.success =
             catX >= boxX
             && Math.floor(catX) + catW <= boxX + boxW
-        //&& Math.floor((this.cat.w / this.box.w) * 100) <= 100
-
 
         if (this.success) {
             this.cat.clip = true
@@ -237,7 +237,7 @@ class GameScene extends Scene {
                 callback: () => {
                     this.cat.headFrame = CatConstants.HEAD_YAY
                     this.deleteTween(catBounceTween)
-                    this.panOut()
+                    this.panOut(0.25)
                 }
             })
             this.tweens.push(catBounceTween)
@@ -247,7 +247,42 @@ class GameScene extends Scene {
             trace(score.toString())
         }
         else {
-
+            const catLoserTween2 = new PositionTween({
+                target: this.cat,
+                durationFrames: Util.secondsToFrames(0.5),
+                startY: this.box.y - 100,
+                endY: Constants.SCREEN_HEIGHT + 64,
+                easing: Easing.easeInQuad,
+                callback: () => {
+                    this.deleteTween(catLoserTween2)
+                    //this.panOut(0.25)
+                }
+            })
+            const catLoserTween1 = new PositionTween({
+                target: this.cat,
+                durationFrames: Util.secondsToFrames(0.5),
+                startY: this.box.y - 32,
+                endY: this.box.y - 100,
+                easing: Easing.easeInOvershoot,
+                callback: () => {
+                    this.deleteTween(catLoserTween1)
+                    this.tweens.push(catLoserTween2)
+                    //this.panOut(0.25)
+                }
+            })
+            const catBounceTween = new PositionTween({
+                target: this.cat,
+                durationFrames: Util.secondsToFrames(0.5),
+                startY: this.cat.y,
+                endY: this.box.y - 32,
+                easing: Easing.easeOutBounce,
+                callback: () => {
+                    this.cat.headFrame = CatConstants.HEAD_SAD
+                    this.deleteTween(catBounceTween)
+                    this.tweens.push(catLoserTween1)
+                }
+            })
+            this.tweens.push(catBounceTween)
         }
     }
 
