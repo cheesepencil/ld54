@@ -6,7 +6,7 @@
 // desc:   Limited Space
 // script: js
 
-let activeScene: Scene = new GameScene() //new TitleScene()
+let activeScene: Scene = new TitleScene()
 let highScore: number = pmem(0)
 const debug = false
 

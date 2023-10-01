@@ -29,6 +29,7 @@ class Cat {
     ticks = 0
     hide = false
     clip = false
+    silent = true
 
     constructor(scene: Scene) {
         this.scene = scene
@@ -36,10 +37,11 @@ class Cat {
 
     update() {
         this.ticks += 1
-        if (this.ticks == this.animSpeed) {
+        if (this.ticks > this.animSpeed) {
             this.ticks = 0
             this.bodyFrameIndex += 1
             if (this.bodyFrameIndex >= 4) this.bodyFrameIndex = 0
+            if (!this.silent) sfx(0)
         }
     }
 

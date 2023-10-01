@@ -3,6 +3,7 @@
 /// <reference path="./lib/fancyText.ts" />
 /// <reference path="./cat.ts" />
 /// <reference path="./box.ts" />
+/// <reference path="./background.ts" />
 
 class GameScene extends Scene {
     actors: { draw: () => void, update: () => void }[] = []
@@ -18,16 +19,16 @@ class GameScene extends Scene {
     stageText: FancyText = new FancyText()
     stageText2: FancyText = new FancyText()
     scoreText: FancyText = new FancyText()
+    background: Background = new Background()
+    speed: number = 0.75
 
     init = () => {
-        this.actors.push(new Background())
         this.box.y += 16
         this.cat.y = CatConstants.CAT_Y - 16
 
         this.camera.x = -Constants.SCREEN_WIDTH
 
         this.scoreText = new FancyText()
-        // scoreText.scene = this
         this.scoreText.x = 6
         this.scoreText.y = 6
         this.scoreText.text = `Score: ${this.score}`
@@ -36,6 +37,7 @@ class GameScene extends Scene {
         this.scoreText.bubbleSize = 2
         this.scoreText.marginX = 2
         this.scoreText.marginY = 2
+        this.scoreText.scene = this
         this.actors.push(this.scoreText)
 
         this.stageText = new FancyText()
@@ -45,6 +47,7 @@ class GameScene extends Scene {
         this.stageText.y = Constants.SCREEN_HEIGHT / 2 - 32
         this.stageText.textColor = 0
         this.stageText.scale = 2
+        this.actors.push(this.stageText)
 
         this.stageText2 = new FancyText()
         this.stageText2.scene = this
@@ -52,6 +55,7 @@ class GameScene extends Scene {
         this.stageText2.x = Constants.SCREEN_WIDTH / 2 - 48
         this.stageText2.y = Constants.SCREEN_HEIGHT / 2 - 32 + 12
         this.stageText2.textColor = 0
+        this.actors.push(this.stageText2)
 
         this.panIn()
 
@@ -75,9 +79,11 @@ class GameScene extends Scene {
             // left arrow
             if (btnp(2)) {
                 if (this.cat.right) {
+                    sfx(6)
                     this.catBackActive = false
                 }
                 else {
+                    sfx(7)
                     this.catFrontActive = false
                 }
             }
@@ -85,24 +91,25 @@ class GameScene extends Scene {
             // right arrow
             if (btnp(3)) {
                 if (this.cat.right) {
+                    sfx(7)
                     this.catFrontActive = false
                 }
                 else {
+                    sfx(6)
                     this.catBackActive = false
                 }
             }
 
             // full stop
             if (btnp(4)) {
+                sfx(6)
                 this.catBackActive = false
                 this.catFrontActive = false
             }
 
-            let speed = 1
+            if (btn(5) && debug) this.speed = 0.05
 
-            if (btn(5) && debug) speed = 0.05
-
-            const catSpeed = speed * (this.cat.right ? 1 : -1)
+            const catSpeed = this.speed * (this.cat.right ? 1 : -1)
 
             if (this.catFrontActive && this.catBackActive) {
                 this.cat.x += catSpeed
@@ -150,14 +157,12 @@ class GameScene extends Scene {
     }
 
     draw = () => {
+        this.background.draw()
+        this.box.draw()
+        this.cat.draw()
         for (const actor of this.actors) {
             actor.draw()
         }
-        this.box.draw()
-        this.cat.draw()
-
-        this.stageText.draw()
-        this.stageText2.draw()
     }
 
     panIn() {
@@ -169,6 +174,7 @@ class GameScene extends Scene {
             easing: Easing.easeOutQuad,
             callback: () => {
                 this.deleteTween(cameraTween)
+                this.cat.silent = false
                 this.cat.hide = false
                 this.ready = true
                 this.catFrontActive = true
@@ -178,15 +184,15 @@ class GameScene extends Scene {
         this.tweens.push(cameraTween)
     }
 
-    panOut(delay?: number) {
+    panOut(delay?: number, callback?: () => void, reverse: boolean = false) {
         const cameraTween = new PositionTween({
             target: this.camera,
             startX: 0,
-            endX: Constants.SCREEN_WIDTH + 32,
+            endX: reverse ? -Constants.SCREEN_WIDTH - 32 : Constants.SCREEN_WIDTH + 32,
             durationFrames: Util.secondsToFrames(0.5),
             delayFrames: Util.secondsToFrames(delay ?? 0),
             easing: Easing.easeOutQuad,
-            callback: () => {
+            callback: callback ?? (() => {
                 this.deleteTween(cameraTween)
                 this.cat.hide = false
                 this.ready = true
@@ -194,13 +200,15 @@ class GameScene extends Scene {
                 this.catBackActive = true
                 this.newStage()
                 this.panIn()
-            }
+            })
         })
         this.tweens.push(cameraTween)
     }
 
     newStage() {
+        this.speed += 0.1
         this.boxNumber += 1
+        this.cat.animSpeed = Util.secondsToFrames(Util.clamp(0.130 - (this.boxNumber * 0.005), 0, 1))
         this.cat.hide = true
         this.cat.w = Util.getRandomIntBetween(36, 101)
         this.cat.right = Util.getRandomInt(2) > 0
@@ -215,8 +223,12 @@ class GameScene extends Scene {
     }
 
     testFit() {
-        trace(`cat.x: ${this.cat.x.toFixed(3)}, cat.w: ${this.cat.w}`)
-        trace(`box.x: ${this.box.x.toFixed(3)}, box.w: ${this.box.w}`)
+        if (debug) {
+            trace(`cat.x: ${this.cat.x.toFixed(3)}, cat.w: ${this.cat.w}`)
+            trace(`box.x: ${this.box.x.toFixed(3)}, box.w: ${this.box.w}`)
+        }
+
+        this.cat.silent = true
 
         // does that cat fit in the box?
         const catX = this.cat.x
@@ -228,6 +240,7 @@ class GameScene extends Scene {
             && Math.floor(catX) + catW <= boxX + boxW
 
         if (this.success) {
+            sfx(1)
             this.cat.clip = true
             const catBounceTween = new PositionTween({
                 target: this.cat,
@@ -235,6 +248,7 @@ class GameScene extends Scene {
                 startY: this.cat.y,
                 endY: this.box.y - 8,
                 callback: () => {
+                    sfx(2)
                     this.cat.headFrame = CatConstants.HEAD_YAY
                     this.deleteTween(catBounceTween)
                     this.panOut(0.25)
@@ -242,11 +256,30 @@ class GameScene extends Scene {
             })
             this.tweens.push(catBounceTween)
 
-            const score = Math.floor((this.cat.w / this.box.w) * 100)
-            this.score += score
-            trace(score.toString())
+            let boxScore = Math.floor((this.cat.w / this.box.w) * 100)
+            const commentary = new Commentary(this, "", 6, () => { this.deleteActor(commentary) })
+            if (boxScore >= 98) {
+                boxScore *= 3
+                commentary.setText(`+${boxScore} PERFECT! 3x point bonus`)
+            }
+            else if (boxScore >= 80) {
+                boxScore *= 2
+                commentary.setText(`+${boxScore} Great! 2x point bonus`)
+                commentary.setColor(5)
+            }
+            else if (boxScore > 50) {
+                commentary.setText(`+${boxScore} OK!`)
+                commentary.setColor(3)
+            }
+            else {
+                commentary.setText(`+${boxScore} Do better!`)
+                commentary.setColor(2)
+            }
+            this.actors.push(commentary)
+            this.score += boxScore
         }
         else {
+            sfx(5)
             const catLoserTween2 = new PositionTween({
                 target: this.cat,
                 durationFrames: Util.secondsToFrames(0.5),
@@ -255,7 +288,7 @@ class GameScene extends Scene {
                 easing: Easing.easeInQuad,
                 callback: () => {
                     this.deleteTween(catLoserTween2)
-                    //this.panOut(0.25)
+                    this.actors.push(new GameOver(this, "you sitted, but did not fitted"))
                 }
             })
             const catLoserTween1 = new PositionTween({
@@ -267,7 +300,6 @@ class GameScene extends Scene {
                 callback: () => {
                     this.deleteTween(catLoserTween1)
                     this.tweens.push(catLoserTween2)
-                    //this.panOut(0.25)
                 }
             })
             const catBounceTween = new PositionTween({
@@ -277,6 +309,7 @@ class GameScene extends Scene {
                 endY: this.box.y - 32,
                 easing: Easing.easeOutBounce,
                 callback: () => {
+                    sfx(3)
                     this.cat.headFrame = CatConstants.HEAD_SAD
                     this.deleteTween(catBounceTween)
                     this.tweens.push(catLoserTween1)
@@ -287,10 +320,11 @@ class GameScene extends Scene {
     }
 
     deleteActor(actor: Actor) {
-        this.actors = this.actors.splice(this.actors.indexOf(actor), 1)
+        const index = this.actors.indexOf(actor)
+        this.actors = this.actors.filter(a => a !== actor)
     }
 
     deleteTween(tween: PositionTween) {
-        this.tweens = this.tweens.splice(this.tweens.indexOf(tween), 1)
+        this.tweens = this.tweens.filter(t => t !== tween)
     }
 }

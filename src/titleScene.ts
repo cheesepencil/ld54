@@ -83,7 +83,8 @@ class TitleScene extends Scene {
             endX: 16,
             durationFrames: Util.secondsToFrames(1),
             delayFrames: Util.secondsToFrames(0),
-            easing: Easing.easeOutOvershoot
+            easing: Easing.easeOutOvershoot,
+            callback: () => { sfx(4) }
         }))
         this.tweens.push(new PositionTween({
             target: title2,
@@ -91,7 +92,8 @@ class TitleScene extends Scene {
             endX: 32,
             durationFrames: Util.secondsToFrames(1),
             delayFrames: Util.secondsToFrames(0.5),
-            easing: Easing.easeInQuart
+            easing: Easing.easeInQuart,
+            callback: () => { sfx(4) }
         }))
 
         const instructions = new Instructions(this)
@@ -172,6 +174,7 @@ class CallToAction {
             }
 
             if (btnp(4) && !this.pushed) {
+                sfx(8)
                 this.scene.tweens.push(new PositionTween({
                     target: this.scene.camera,
                     startX: this.scene.camera.x,
