@@ -12,29 +12,31 @@ class GameScene extends Scene {
     box: Box = new Box(this)
     cat: Cat = new Cat(this)
     ready: boolean = false
+    success: boolean = false
     catFrontActive: boolean = false
     catBackActive: boolean = false
     stageText: FancyText = new FancyText()
     stageText2: FancyText = new FancyText()
+    scoreText: FancyText = new FancyText()
 
     init = () => {
         this.actors.push(new Background())
         this.box.y += 16
-        this.cat.y -= 16
+        this.cat.y = CatConstants.CAT_Y - 16
 
         this.camera.x = -Constants.SCREEN_WIDTH
 
-        const scoreText = new FancyText()
+        this.scoreText = new FancyText()
         // scoreText.scene = this
-        scoreText.x = 6
-        scoreText.y = 6
-        scoreText.text = `Score: ${this.score}`
-        scoreText.backgroundColor = 12
-        scoreText.textColor = 15
-        scoreText.bubbleSize = 2
-        scoreText.marginX = 2
-        scoreText.marginY = 2
-        this.actors.push(scoreText)
+        this.scoreText.x = 6
+        this.scoreText.y = 6
+        this.scoreText.text = `Score: ${this.score}`
+        this.scoreText.backgroundColor = 12
+        this.scoreText.textColor = 15
+        this.scoreText.bubbleSize = 2
+        this.scoreText.marginX = 2
+        this.scoreText.marginY = 2
+        this.actors.push(this.scoreText)
 
         this.stageText = new FancyText()
         this.stageText.scene = this
@@ -67,6 +69,7 @@ class GameScene extends Scene {
         this.box.update()
         this.stageText.text = `Box #${this.boxNumber}`
         this.stageText2.text = `${this.box.w}cm`
+        this.scoreText.text = `Score: ${this.score}`
 
         if (this.ready) {
             // left arrow
@@ -95,7 +98,10 @@ class GameScene extends Scene {
                 this.catFrontActive = false
             }
 
-            const speed = 1
+            let speed = 1
+
+            if (btn(5) && debug) speed = 0.05
+
             const catSpeed = speed * (this.cat.right ? 1 : -1)
 
             if (this.catFrontActive && this.catBackActive) {
@@ -138,7 +144,7 @@ class GameScene extends Scene {
             // time to check the fit
             if (!this.catFrontActive && !this.catBackActive) {
                 this.ready = false
-                this.panOut()
+                this.testFit()
             }
         }
     }
@@ -147,8 +153,8 @@ class GameScene extends Scene {
         for (const actor of this.actors) {
             actor.draw()
         }
-        this.cat.draw()
         this.box.draw()
+        this.cat.draw()
 
         this.stageText.draw()
         this.stageText2.draw()
@@ -197,10 +203,52 @@ class GameScene extends Scene {
         this.cat.hide = true
         this.cat.w = Util.getRandomIntBetween(36, 101)
         this.cat.right = Util.getRandomInt(2) > 0
-        this.cat.x = this.cat.right ? 0 - this.cat.w - 64: Constants.SCREEN_WIDTH + 64
+        this.cat.x = this.cat.right ? 0 - this.cat.w - 64 : Constants.SCREEN_WIDTH + 64
+        this.cat.y = CatConstants.CAT_Y - 16
+        this.cat.headFrame = CatConstants.HEAD_IDLE
         this.box.w = Util.getRandomIntBetween(48, 151)
         this.box.right = Util.getRandomInt(2) > 0
-        this.box.x = Constants.SCREEN_WIDTH / 2 - this.box.w / 2
+        this.box.x = Math.floor(Constants.SCREEN_WIDTH / 2 - this.box.w / 2)
+        this.success = false
+    }
+
+    testFit() {
+        trace(`cat.x: ${this.cat.x.toFixed(3)}, cat.w: ${this.cat.w}`)
+        trace(`box.x: ${this.box.x.toFixed(3)}, box.w: ${this.box.w}`)
+
+        // does that cat fit in the box?
+        const catX = this.cat.x
+        const catW = Math.floor(this.cat.w)
+        const boxX = this.box.x
+        const boxW = this.box.w
+        this.success =
+            catX >= boxX
+            && Math.floor(catX) + catW <= boxX + boxW
+        //&& Math.floor((this.cat.w / this.box.w) * 100) <= 100
+
+
+        if (this.success) {
+            this.cat.clip = true
+            const catBounceTween = new PositionTween({
+                target: this.cat,
+                durationFrames: Util.secondsToFrames(0.5),
+                startY: this.cat.y,
+                endY: this.box.y - 8,
+                callback: () => {
+                    this.cat.headFrame = CatConstants.HEAD_YAY
+                    this.deleteTween(catBounceTween)
+                    this.panOut()
+                }
+            })
+            this.tweens.push(catBounceTween)
+
+            const score = Math.floor((this.cat.w / this.box.w) * 100)
+            this.score += score
+            trace(score.toString())
+        }
+        else {
+
+        }
     }
 
     deleteActor(actor: Actor) {

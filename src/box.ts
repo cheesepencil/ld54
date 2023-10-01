@@ -12,7 +12,7 @@ class Box {
     right: boolean = false
     y: number = 96
     w: number = 128
-    x: number = Constants.SCREEN_WIDTH / 2 - this.w / 2
+    x: number = Math.floor(Constants.SCREEN_WIDTH / 2 - this.w / 2)
 
     constructor(scene: Scene) {
         this.scene = scene
@@ -36,7 +36,7 @@ class Box {
         rectb(
             this.x + 1 - this.scene.camera.x,
             this.y - this.scene.camera.y,
-            this.w - 2,
+            this.w,
             BoxConstants.BOX_SPRITE_HEIGHT * 8,
             BoxConstants.BOX_BORDER_COLOR)
         spr(
@@ -49,5 +49,11 @@ class Box {
             undefined,
             BoxConstants.BOX_SPRITE_WIDTH,
             BoxConstants.BOX_SPRITE_HEIGHT)
+        if (debug) {
+            const x1 = this.x - this.scene.camera.x
+            const x2 = x1 + this.w
+            line(x1, this.y -10, x1, this.y + 10, 1)
+            line(x2, this.y -10, x2, this.y + 10, 1)
+        }
     }
 }

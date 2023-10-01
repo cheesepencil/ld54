@@ -28,6 +28,7 @@ class Cat {
     animSpeed = Util.secondsToFrames(0.125)
     ticks = 0
     hide = false
+    clip = false
 
     constructor(scene: Scene) {
         this.scene = scene
@@ -44,9 +45,11 @@ class Cat {
 
     draw() {
         if (this.hide) return
-        
+
         const camX = this.scene.camera.x
         const camY = this.scene.camera.y
+
+        if (this.clip) clip(0, 0, Constants.SCREEN_WIDTH, 96 + 16)
 
         // front
         const frontX = (this.right
@@ -210,6 +213,7 @@ class Cat {
             CatConstants.BODY_COLOR)
 
         // head
+        clip()
         const headX = (this.right
             ? this.x + this.w - CatConstants.HEAD_W * 8 + 20 + 1
             : this.x - 20) - camX
@@ -253,8 +257,8 @@ class Cat {
             CatConstants.HEAD_H
         )
         if (debug) {
-            line(this.x - camX, this.y - camY, this.x - camX, this.y + 32 - camY, 6)
-            line(this.x + this.w - camX, this.y - camY, this.x + this.w - camX, this.y + 32 - camY, 6)
+            line(this.x - camX, this.y - camY, this.x - camX, this.y + 64 - camY, 6)
+            line(this.x + this.w - camX, this.y - camY, this.x + this.w - camX, this.y + 64 - camY, 6)
         }
     }
 }
