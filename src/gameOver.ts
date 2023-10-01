@@ -71,5 +71,8 @@ class GameOver implements Actor {
         if (btnp(4)) {
             this.scene.panOut(0.125, () => { activeScene = new TitleScene() }, true)
         }
+        if (btnp(5)) {
+            this.scene.panOut(0.125, () => { activeScene = new GameScene() }, true)
+        }
     };
 }

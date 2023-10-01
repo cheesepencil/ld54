@@ -1,9 +1,9 @@
 /// <reference path="./src/titleScene.ts" />
 /// <reference path="./src/gameScene.ts" />
 
-// title:  LD54
+// title:  If I Fits, I Sits
 // author: cheesepencil
-// desc:   Limited Space
+// desc:   LD54 - Limited Space
 // script: js
 
 let activeScene: Scene = new TitleScene()

@@ -210,7 +210,7 @@ class GameScene extends Scene {
         this.boxNumber += 1
         this.cat.animSpeed = Util.secondsToFrames(Util.clamp(0.130 - (this.boxNumber * 0.005), 0, 1))
         this.cat.hide = true
-        this.cat.w = Util.getRandomIntBetween(36, 101)
+        this.cat.w = Util.getRandomIntBetween(36, 201)
         this.cat.right = Util.getRandomInt(2) > 0
         this.cat.x = this.cat.right ? 0 - this.cat.w - 64 : Constants.SCREEN_WIDTH + 64
         this.cat.y = CatConstants.CAT_Y - 16
